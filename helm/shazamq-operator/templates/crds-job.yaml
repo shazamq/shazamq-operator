@@ -1,0 +1,6 @@
+{{- if .Values.crds.install }}
+# Note: CRDs are in templates/crds/ directory
+# Helm automatically installs them before other resources
+# This file ensures proper ordering
+{{- end }}
+

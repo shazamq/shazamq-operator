@@ -1,0 +1,21 @@
+apiVersion: v2
+name: shazamq-operator
+description: Kubernetes operator for managing Shazamq clusters
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - shazamq
+  - kafka
+  - messaging
+  - operator
+home: https://github.com/murtaza/shazamq-operator
+sources:
+  - https://github.com/murtaza/shazamq-operator
+maintainers:
+  - name: Murtaza Shajapurwala
+    email: murtaza@shazamq.io
+annotations:
+  # CRDs are included in this chart
+  helm.sh/resource-policy: keep
+

@@ -1,0 +1,75 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+The Shazamq Operator has been deployed to namespace: {{ .Release.Namespace }}
+
+📋 What was installed:
+  ✓ CustomResourceDefinition: shazamqclusters.shazamq.io
+  ✓ ServiceAccount: {{ include "shazamq-operator.serviceAccountName" . }}
+  ✓ ClusterRole and ClusterRoleBinding
+  ✓ Operator Deployment: {{ include "shazamq-operator.fullname" . }}
+
+🔍 To check the operator status:
+
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "shazamq-operator.name" . }}
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "shazamq-operator.name" . }} -f
+
+📖 To deploy a Shazamq cluster:
+
+  1. Create a namespace:
+     kubectl create namespace messaging
+
+  2. Deploy a cluster:
+     kubectl apply -f - <<EOF
+     apiVersion: shazamq.io/v1alpha1
+     kind: ShazamqCluster
+     metadata:
+       name: my-cluster
+       namespace: messaging
+     spec:
+       replicas: 3
+       version: "0.1.0-rc1"
+     EOF
+
+  3. Check cluster status:
+     kubectl get shazamqcluster -n messaging
+     kubectl get pods -n messaging
+
+{{- if .Values.metrics.enabled }}
+
+📊 Metrics endpoint:
+  http://{{ include "shazamq-operator.fullname" . }}:{{ .Values.metrics.port }}/metrics
+
+{{- if .Values.metrics.serviceMonitor.enabled }}
+  ServiceMonitor created for Prometheus scraping
+{{- end }}
+{{- end }}
+
+{{- if eq .Values.watchNamespace "" }}
+
+🔭 The operator is watching ALL namespaces.
+{{- else }}
+
+🔭 The operator is watching namespace: {{ .Values.watchNamespace }}
+{{- end }}
+
+{{- if .Values.crds.keep }}
+
+⚠️  CRD Retention: CRDs will be KEPT on uninstall (crds.keep=true)
+   This prevents accidental deletion of ShazamqCluster resources.
+{{- else }}
+
+⚠️  CRD Retention: CRDs will be DELETED on uninstall (crds.keep=false)
+   CAUTION: This will delete all ShazamqCluster resources!
+{{- end }}
+
+📚 Documentation:
+  Operator: https://github.com/murtaza/shazamq-operator
+  Shazamq: https://github.com/murtaza/shazamq
+  Docs: https://shazamq.io/docs
+
+💬 Support:
+  Slack: https://shazamq.slack.com
+  Issues: https://github.com/murtaza/shazamq-operator/issues
+

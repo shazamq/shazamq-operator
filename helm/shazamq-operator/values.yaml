@@ -1,0 +1,129 @@
+# Default values for shazamq-operator
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Operator deployment
+replicaCount: 1
+
+image:
+  repository: shazamq/shazamq-operator
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "shazamq-operator"
+
+# RBAC
+rbac:
+  create: true
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+# Resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+# Example:
+# - key: "operator"
+#   operator: "Equal"
+#   value: "true"
+#   effect: "NoSchedule"
+
+# Affinity
+affinity: {}
+# Example:
+# nodeAffinity:
+#   preferredDuringSchedulingIgnoredDuringExecution:
+#     - weight: 100
+#       preference:
+#         matchExpressions:
+#           - key: node-role.kubernetes.io/control-plane
+#             operator: In
+#             values:
+#               - "true"
+
+# Environment variables
+env:
+  - name: RUST_LOG
+    value: "info"
+  - name: RUST_BACKTRACE
+    value: "1"
+
+# Logging
+logging:
+  level: info
+  format: json
+
+# Metrics
+metrics:
+  enabled: true
+  port: 8080
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+
+# Leader election
+leaderElection:
+  enabled: true
+  namespace: ""  # Defaults to release namespace
+
+# Webhook (for future use)
+webhook:
+  enabled: false
+  port: 9443
+
+# CRD management
+crds:
+  # Install CRDs automatically with Helm
+  install: true
+  # Keep CRDs on uninstall (recommended for production)
+  keep: true
+  # Annotations to add to CRDs
+  annotations: {}
+    # argocd.argoproj.io/sync-options: "Replace=true"
+
+# Namespace management
+watchNamespace: ""  # Empty = all namespaces
+
+# Priority class
+priorityClassName: ""
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
