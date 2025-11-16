@@ -37,7 +37,7 @@ async fn main() -> anyhow::Result<()> {
 
     info!("╔═══════════════════════════════════════════════════════╗");
     info!("║            Shazamq Kubernetes Operator                ║");
-    info!("║                  Version 0.1.1                         ║");
+    info!("║                  Version 0.1.0                         ║");
     info!("╚═══════════════════════════════════════════════════════╝");
 
     // Create Kubernetes client

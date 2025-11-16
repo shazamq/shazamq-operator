@@ -87,7 +87,7 @@ helm upgrade shazamq-operator shazamq/shazamq-operator \
 |-----------|-------------|---------|
 | `replicaCount` | Number of operator replicas | `1` |
 | `image.repository` | Operator image repository | `shazamq/shazamq-operator` |
-| `image.tag` | Operator image tag | `0.1.1` |
+| `image.tag` | Operator image tag | `0.1.0` |
 | `resources.limits.cpu` | CPU limit | `500m` |
 | `resources.limits.memory` | Memory limit | `512Mi` |
 | `watchNamespace` | Namespace to watch (empty = all) | `""` |
@@ -198,7 +198,7 @@ metadata:
   namespace: default
 spec:
   replicas: 1
-  version: "0.1.1-rc1"
+  version: "0.1.0-rc1"
 EOF
 
 # Watch the operator create resources
@@ -259,7 +259,7 @@ spec:
   source:
     repoURL: https://helm.shazamq.io
     chart: shazamq-operator
-    targetRevision: 0.1.1
+    targetRevision: 0.1.0
     helm:
       values: |
         crds:

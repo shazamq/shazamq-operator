@@ -230,7 +230,7 @@ pub struct BrokerStatus {
 
 // Default values
 fn default_version() -> String {
-    "0.1.1-rc1".to_string()
+    "0.1.0-rc1".to_string()
 }
 
 fn default_image() -> String {

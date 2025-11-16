@@ -8,7 +8,7 @@ replicaCount: 1
 image:
   repository: quay.io/shazamq/shazamq-operator
   pullPolicy: IfNotPresent
-  tag: "0.1.1"
+  tag: "0.1.0"
 
 imagePullSecrets: []
 nameOverride: ""

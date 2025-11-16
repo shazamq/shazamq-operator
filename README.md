@@ -65,7 +65,7 @@ metadata:
   namespace: messaging
 spec:
   replicas: 3
-  version: "0.1.1-rc1"
+  version: "0.1.0-rc1"
   storage:
     volumeClaimTemplate:
       spec:
@@ -129,7 +129,7 @@ metadata:
   name: simple-cluster
 spec:
   replicas: 3
-  version: "0.1.1-rc1"
+  version: "0.1.0-rc1"
 ```
 
 ### Production Configuration
@@ -288,7 +288,7 @@ replicaCount: 1
 # Operator image
 image:
   repository: shazamq/shazamq-operator
-  tag: "0.1.1"
+  tag: "0.1.0"
 
 # Resources
 resources:

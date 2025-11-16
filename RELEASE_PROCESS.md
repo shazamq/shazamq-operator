@@ -33,7 +33,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 | Operator Version | Helm Chart Version | Docker Tag | Status |
 |------------------|-------------------|------------|--------|
-| 0.1.1            | 1.0.0             | 0.1.1      | ✅ Current |
+| 0.1.0            | 1.0.0             | 0.1.0      | ✅ Current |
 | 0.2.0 (planned)  | 1.1.0 (planned)   | 0.2.0      | 🔮 Future |
 
 ---
@@ -62,12 +62,12 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 - **Release branches**: `release/v<version>`
   - Branch from: `develop`
   - Merge to: `main` and `develop`
-  - Naming: `release/v0.1.1`
+  - Naming: `release/v0.1.0`
 
 - **Hotfix branches**: `hotfix/v<version>`
   - Branch from: `main`
   - Merge to: `main` and `develop`
-  - Naming: `hotfix/v0.1.2`
+  - Naming: `hotfix/v0.1.1`
 
 ### Branch Protection Rules
 
@@ -141,7 +141,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 ```bash
 # Automated release (recommended)
-./scripts/release.sh 0.1.1
+./scripts/release.sh 0.1.0
 ```
 
 This script will:
@@ -189,15 +189,15 @@ If automation fails or manual intervention is needed:
 # Create release branch from develop
 git checkout develop
 git pull origin develop
-git checkout -b release/v0.1.1
+git checkout -b release/v0.1.0
 
 # Update versions
 # Edit: Cargo.toml, charts/Chart.yaml, charts/values.yaml
 
 # Commit changes
 git add -A
-git commit -m "chore: prepare release v0.1.1"
-git push origin release/v0.1.1
+git commit -m "chore: prepare release v0.1.0"
+git push origin release/v0.1.0
 ```
 
 ### Step 2: Build and Test
@@ -208,10 +208,10 @@ cargo build --release
 cargo test --release
 
 # Build Docker image
-docker build -t shazamq/shazamq-operator:0.1.1 .
+docker build -t shazamq/shazamq-operator:0.1.0 .
 
 # Test Docker image
-docker run --rm shazamq/shazamq-operator:0.1.1 --version
+docker run --rm shazamq/shazamq-operator:0.1.0 --version
 
 # Package Helm chart
 helm package charts/ -d .deploy
@@ -221,11 +221,11 @@ helm lint .deploy/shazamq-operator-*.tgz
 ### Step 3: Merge to Main
 
 ```bash
-# Create PR: release/v0.1.1 → main
+# Create PR: release/v0.1.0 → main
 # After review and approval:
 git checkout main
 git pull origin main
-git merge --no-ff release/v0.1.1
+git merge --no-ff release/v0.1.0
 git push origin main
 ```
 
@@ -233,12 +233,12 @@ git push origin main
 
 ```bash
 # Create annotated tag
-git tag -a v0.1.1 -m "Release v0.1.1
+git tag -a v0.1.0 -m "Release v0.1.0
 
 See CHANGELOG.md for details."
 
 # Push tag (triggers GitHub Actions)
-git push origin v0.1.1
+git push origin v0.1.0
 ```
 
 ### Step 5: Manual Container Push (if needed)
@@ -250,13 +250,13 @@ docker login ghcr.io
 
 # Build multi-arch and push to Quay.io (primary)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t quay.io/shazamq/shazamq-operator:0.1.1 \
+  -t quay.io/shazamq/shazamq-operator:0.1.0 \
   -t quay.io/shazamq/shazamq-operator:latest \
   --push .
 
 # Push to GHCR (mirror)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/shazamq/shazamq-operator:0.1.1 \
+  -t ghcr.io/shazamq/shazamq-operator:0.1.0 \
   -t ghcr.io/shazamq/shazamq-operator:latest \
   --push .
 ```
@@ -280,7 +280,7 @@ helm repo index . --url https://shazamq.github.io/shazamq-operator
 
 # Commit and push
 git add .
-git commit -m "Release Helm chart v1.0.0 (app v0.1.1)"
+git commit -m "Release Helm chart v1.0.0 (app v0.1.0)"
 git push origin gh-pages
 ```
 
@@ -288,11 +288,11 @@ git push origin gh-pages
 
 ```bash
 # Extract changelog section
-sed -n "/## \[0.1.1\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
+sed -n "/## \[0.1.0\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
 
 # Create release via GitHub CLI
-gh release create v0.1.1 \
-  --title "Release v0.1.1" \
+gh release create v0.1.0 \
+  --title "Release v0.1.0" \
   --notes-file release-notes.md \
   target/release/shazamq-operator \
   .deploy/*.tgz
@@ -314,10 +314,10 @@ git push origin develop
 
 ```bash
 # Quay.io (primary)
-docker pull quay.io/shazamq/shazamq-operator:0.1.1
+docker pull quay.io/shazamq/shazamq-operator:0.1.0
 
 # GHCR (mirror)
-docker pull ghcr.io/shazamq/shazamq-operator:0.1.1
+docker pull ghcr.io/shazamq/shazamq-operator:0.1.0
 
 # Helm chart
 helm repo add shazamq https://shazamq.github.io/shazamq-operator
@@ -340,7 +340,7 @@ open https://artifacthub.io/packages/helm/shazamq/shazamq-operator
 ```markdown
 **Template for announcement:**
 
-🎉 Shazamq Operator v0.1.1 Released!
+🎉 Shazamq Operator v0.1.0 Released!
 
 We're excited to announce the first release of the Shazamq Operator!
 
@@ -357,7 +357,7 @@ helm install shazamq-operator shazamq/shazamq-operator
 ```
 
 **Links:**
-- Release Notes: https://github.com/shazamq/shazamq-operator/releases/tag/v0.1.1
+- Release Notes: https://github.com/shazamq/shazamq-operator/releases/tag/v0.1.0
 - Documentation: https://github.com/shazamq/shazamq-operator/blob/main/README.md
 - Helm Chart: https://artifacthub.io/packages/helm/shazamq/shazamq-operator
 
@@ -374,7 +374,7 @@ For critical bugs in production:
 
 ```bash
 git checkout main
-git checkout -b hotfix/v0.1.2
+git checkout -b hotfix/v0.1.1
 ```
 
 ### 2. Fix Bug
@@ -389,11 +389,11 @@ git commit -m "fix: critical bug in reconciler"
 
 ```bash
 # Bump patch version in:
-# - Cargo.toml: 0.1.1 → 0.1.2
-# - charts/Chart.yaml: appVersion 0.1.2
-# - charts/values.yaml: image tag 0.1.2
+# - Cargo.toml: 0.1.0 → 0.1.1
+# - charts/Chart.yaml: appVersion 0.1.1
+# - charts/values.yaml: image tag 0.1.1
 git add -A
-git commit -m "chore: bump version to 0.1.2"
+git commit -m "chore: bump version to 0.1.1"
 ```
 
 ### 4. Release
@@ -401,18 +401,18 @@ git commit -m "chore: bump version to 0.1.2"
 ```bash
 # Merge to main
 git checkout main
-git merge --no-ff hotfix/v0.1.2
-git tag -a v0.1.2 -m "Hotfix v0.1.2"
+git merge --no-ff hotfix/v0.1.1
+git tag -a v0.1.1 -m "Hotfix v0.1.1"
 git push origin main
-git push origin v0.1.2
+git push origin v0.1.1
 
 # Merge back to develop
 git checkout develop
-git merge hotfix/v0.1.2
+git merge hotfix/v0.1.1
 git push origin develop
 
 # Delete hotfix branch
-git branch -d hotfix/v0.1.2
+git branch -d hotfix/v0.1.1
 ```
 
 ---
@@ -427,7 +427,7 @@ git branch -d hotfix/v0.1.2
 
 | Version | Target Date | Key Features |
 |---------|-------------|--------------|
-| 0.1.1   | 2025-11-16  | ✅ Initial release |
+| 0.1.0   | 2025-11-16  | ✅ Initial release |
 | 0.2.0   | 2026-Q1     | Webhooks, auto-scaling |
 | 0.3.0   | 2026-Q2     | Multi-cluster federation |
 | 1.0.0   | 2026-Q3     | Stable API, LTS support |
@@ -452,11 +452,11 @@ helm upgrade shazamq-operator shazamq/shazamq-operator --version 0.9.0
 
 ```bash
 # Delete tag
-git tag -d v0.1.1
-git push origin :refs/tags/v0.1.1
+git tag -d v0.1.0
+git push origin :refs/tags/v0.1.0
 
 # Delete GitHub release
-gh release delete v0.1.1
+gh release delete v0.1.0
 
 # Remove from Helm repo
 # (edit gh-pages branch)
