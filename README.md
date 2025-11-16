@@ -92,7 +92,7 @@ The operator watches `ShazamqCluster` resources and creates:
 
 ```
 ┌──────────────────────────────────────────┐
-│       Kubernetes API Server             │
+│       Kubernetes API Server              │
 └─────────────┬────────────────────────────┘
               │ Watches
               ▼
@@ -106,13 +106,13 @@ The operator watches `ShazamqCluster` resources and creates:
               ▼
 ┌──────────────────────────────────────────┐
 │   StatefulSet (Broker Pods)              │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐   │
-│  │ Broker 0│ │ Broker 1│ │ Broker 2│   │
-│  └────┬────┘ └────┬────┘ └────┬────┘   │
-│       │           │           │         │
-│  ┌────▼────┐ ┌───▼─────┐┌───▼─────┐   │
-│  │  PVC 0  │ │  PVC 1  ││  PVC 2  │   │
-│  └─────────┘ └─────────┘└─────────┘   │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐     │
+│  │ Broker 0│ │ Broker 1│ │ Broker 2│     │
+│  └────┬────┘ └────┬────┘ └────┬────┘     │
+│       │           │           │          │
+│  ┌────▼────┐ ┌────▼────┐ ┌────▼────┐     │
+│  │  PVC 0  │ │  PVC 1  │ │  PVC 2  │     │
+│  └─────────┘ └─────────┘ └─────────┘     │
 └──────────────────────────────────────────┘
 ```
 
@@ -450,7 +450,7 @@ Apache License 2.0
 ## Support
 
 - **Documentation**: https://shazamq.io/docs/operator
-- **Issues**: https://github.com/murtaza/shazamq-operator/issues
+- **Issues**: https://github.com/shazamq/shazamq-operator/issues
 - **Slack**: https://shazamq.slack.com
 - **Email**: support@shazamq.io
 

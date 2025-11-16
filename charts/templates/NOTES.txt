@@ -65,11 +65,11 @@ The Shazamq Operator has been deployed to namespace: {{ .Release.Namespace }}
 {{- end }}
 
 📚 Documentation:
-  Operator: https://github.com/murtaza/shazamq-operator
-  Shazamq: https://github.com/murtaza/shazamq
+  Operator: https://github.com/shazamq/shazamq-operator
+  Shazamq: https://github.com/shazamq/shazamq
   Docs: https://shazamq.io/docs
 
 💬 Support:
   Slack: https://shazamq.slack.com
-  Issues: https://github.com/murtaza/shazamq-operator/issues
+  Issues: https://github.com/shazamq/shazamq-operator/issues
 

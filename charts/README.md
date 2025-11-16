@@ -304,6 +304,6 @@ helm template shazamq-operator helm/shazamq-operator \
 ## Support
 
 - **Documentation**: https://shazamq.io/docs/operator
-- **Issues**: https://github.com/murtaza/shazamq-operator/issues
+- **Issues**: https://github.com/shazamq/shazamq-operator/issues
 - **Slack**: https://shazamq.slack.com
 

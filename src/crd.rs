@@ -2,11 +2,10 @@
 //
 // ShazamqCluster CRD definition
 
-use k8s_openapi::apimachinery::pkg::apis::meta::v1::Condition;
 use kube::CustomResource;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 /// ShazamqCluster CRD specification
 #[derive(CustomResource, Debug, Clone, Deserialize, Serialize, JsonSchema)]
@@ -63,15 +62,15 @@ pub struct ShazamqClusterSpec {
     
     /// Pod annotations
     #[serde(default)]
-    pub pod_annotations: Option<HashMap<String, String>>,
+    pub pod_annotations: Option<BTreeMap<String, String>>,
     
     /// Pod labels
     #[serde(default)]
-    pub pod_labels: Option<HashMap<String, String>>,
+    pub pod_labels: Option<BTreeMap<String, String>>,
     
     /// Node selector
     #[serde(default)]
-    pub node_selector: Option<HashMap<String, String>>,
+    pub node_selector: Option<BTreeMap<String, String>>,
     
     /// Service configuration
     #[serde(default)]
@@ -199,6 +198,17 @@ pub struct ServiceMonitorConfig {
     pub scrape_timeout: String,
 }
 
+/// Condition for status (compatible with Kubernetes Condition)
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct StatusCondition {
+    pub r#type: String,
+    pub status: String,
+    pub last_transition_time: String,
+    pub reason: Option<String>,
+    pub message: Option<String>,
+}
+
 /// ShazamqCluster status
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
@@ -206,7 +216,7 @@ pub struct ShazamqClusterStatus {
     pub phase: Option<String>,
     pub replicas: Option<i32>,
     pub ready_replicas: Option<i32>,
-    pub conditions: Option<Vec<Condition>>,
+    pub conditions: Option<Vec<StatusCondition>>,
     pub brokers: Option<Vec<BrokerStatus>>,
 }
 
