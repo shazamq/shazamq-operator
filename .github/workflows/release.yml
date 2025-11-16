@@ -28,6 +28,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
             artifact_name: shazamq-operator
             asset_name: shazamq-operator-${{ github.ref_name }}-linux-arm64
+            use_cross: true
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: shazamq-operator
@@ -42,9 +43,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@main
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
           targets: ${{ matrix.target }}
 
       - name: Cache cargo registry
@@ -52,40 +52,55 @@ jobs:
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
 
       - name: Cache cargo index
         uses: actions/cache@v4
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-
 
       - name: Cache cargo build
         uses: actions/cache@v4
         with:
           path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-cargo-build-
 
-      - name: Install cross-compilation tools
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+      - name: Install cross
+        if: matrix.use_cross == true
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
+          cargo install cross --git https://github.com/cross-rs/cross
 
-      - name: Build release binary
+      - name: Build release binary (native)
+        if: matrix.use_cross != true
         run: |
           cargo build --release --target ${{ matrix.target }}
+
+      - name: Build release binary (cross)
+        if: matrix.use_cross == true
+        run: |
+          cross build --release --target ${{ matrix.target }}
 
       - name: Create tarball
         run: |
           cd target/${{ matrix.target }}/release
-          tar czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.artifact_name }}
+          tar czf ../../../${{ matrix.asset_name }}.tar.gz ${{ matrix.artifact_name }}
+          cd ../../..
           sha256sum ${{ matrix.asset_name }}.tar.gz > ${{ matrix.asset_name }}.tar.gz.sha256
+          ls -la
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
-          path: target/${{ matrix.target }}/release/${{ matrix.asset_name }}.tar.gz*
+          path: |
+            ${{ matrix.asset_name }}.tar.gz
+            ${{ matrix.asset_name }}.tar.gz.sha256
 
   build-docker:
     name: Build and Push Docker Images
@@ -95,20 +110,20 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Quay.io
-        uses: docker/login-action@v4
+        uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -153,16 +168,30 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Configure Git
+      - name: Get version
+        id: get_version
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Update Chart version
+        run: |
+          # Update Chart.yaml with the release version
+          sed -i "s/^version:.*/version: ${{ steps.get_version.outputs.VERSION }}/" charts/Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${{ steps.get_version.outputs.VERSION }}\"/" charts/Chart.yaml
 
       - name: Package Helm chart
         run: |
           mkdir -p .deploy
           helm package charts/ -d .deploy
-          echo "Chart packaged: $(ls -la .deploy/)"
+          ls -la .deploy/
+          echo "CHART_PACKAGE=$(ls .deploy/*.tgz)" >> $GITHUB_ENV
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
@@ -178,7 +207,13 @@ jobs:
           
           # Update index.yaml
           cd gh-pages
-          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }} --merge index.yaml
+          
+          # Create index.yaml if it doesn't exist
+          if [ ! -f "index.yaml" ]; then
+            helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          else
+            helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }} --merge index.yaml
+          fi
           
           # Ensure essential files exist
           if [ ! -f "index.html" ]; then
@@ -230,7 +265,7 @@ jobs:
                     <p class="subtitle">Kubernetes Operator for Managing Shazamq Clusters</p>
                     <div class="section">
                         <span class="badge badge-success">✓ Active</span>
-                        <span class="badge badge-info">v1.0.0</span>
+                        <span class="badge badge-info">Latest: ${{ steps.get_version.outputs.VERSION }}</span>
                         <span class="badge badge-info">Kafka-compatible</span>
                     </div>
                     <div class="section">
@@ -254,7 +289,7 @@ jobs:
                     <div class="section">
                         <h2>📚 Available Charts</h2>
                         <ul>
-                            <li><strong>shazamq-operator</strong> - Kubernetes operator for managing Shazamq clusters (v1.0.0)</li>
+                            <li><strong>shazamq-operator</strong> - Kubernetes operator for managing Shazamq clusters</li>
                         </ul>
                     </div>
                     <div class="section">
@@ -295,20 +330,26 @@ jobs:
           # Ensure .nojekyll exists
           touch .nojekyll
           
-          # Ensure artifacthub-repo.yml exists (copy from main branch if missing)
+          # Create or update artifacthub-repo.yml
           if [ ! -f "artifacthub-repo.yml" ]; then
-            echo "Copying artifacthub-repo.yml from main branch..."
-            git checkout origin/main -- artifacthub-repo.yml 2>/dev/null || \
-            git checkout origin/main -- artifacthub-repo.yml 2>/dev/null || \
-            echo "artifacthub-repo.yml not found in main/main, skipping"
+            cat > artifacthub-repo.yml <<'EOF'
+            repositoryID: shazamq-operator
+            owners:
+              - name: shazamq
+                email: team@shazamq.io
+            EOF
           fi
 
       - name: Commit and push to gh-pages
         run: |
           cd gh-pages
           git add .
-          git commit -m "Release Helm chart ${{ github.ref_name }}" || echo "No changes to commit"
-          git push origin gh-pages
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Release Helm chart ${{ github.ref_name }}"
+            git push origin gh-pages
+          fi
 
       - name: Upload Helm chart artifact
         uses: actions/upload-artifact@v4
@@ -329,37 +370,101 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          pattern: '*'
-          merge-multiple: true
 
-      - name: Generate checksums
+      - name: Display structure of downloaded files
+        run: ls -laR artifacts/
+
+      - name: Prepare release assets
         run: |
-          cd artifacts
-          find . -type f \( -name "*.tar.gz" -o -name "*.tgz" \) -exec sha256sum {} \; > CHECKSUMS.txt
-          cat CHECKSUMS.txt
+          mkdir -p release-assets
+          
+          # Move all binary artifacts to release-assets
+          for dir in artifacts/shazamq-operator-*; do
+            if [ -d "$dir" ]; then
+              echo "Processing $dir"
+              cp "$dir"/*.tar.gz release-assets/ 2>/dev/null || true
+              cp "$dir"/*.sha256 release-assets/ 2>/dev/null || true
+            fi
+          done
+          
+          # Move helm chart to release-assets
+          if [ -d "artifacts/helm-chart" ]; then
+            cp artifacts/helm-chart/*.tgz release-assets/ 2>/dev/null || true
+          fi
+          
+          # Generate consolidated checksums
+          cd release-assets
+          if ls *.tar.gz *.tgz 1> /dev/null 2>&1; then
+            sha256sum *.tar.gz *.tgz > CHECKSUMS.txt 2>/dev/null || true
+          fi
+          
+          echo "Release assets:"
+          ls -la
 
       - name: Extract changelog for this version
         id: changelog
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Create a default release notes file
+          cat > release-notes.md << EOF
+          ## Release ${GITHUB_REF#refs/tags/}
+          
+          ### 📦 Assets
+          
+          #### Binary Releases
+          - Linux AMD64: \`shazamq-operator-${GITHUB_REF_NAME}-linux-amd64.tar.gz\`
+          - Linux ARM64: \`shazamq-operator-${GITHUB_REF_NAME}-linux-arm64.tar.gz\`
+          - macOS AMD64: \`shazamq-operator-${GITHUB_REF_NAME}-darwin-amd64.tar.gz\`
+          - macOS ARM64: \`shazamq-operator-${GITHUB_REF_NAME}-darwin-arm64.tar.gz\`
+          
+          #### Container Images
+          - \`quay.io/shazamq/shazamq-operator:${VERSION}\`
+          - \`ghcr.io/${{ github.repository }}:${VERSION}\`
+          
+          #### Helm Chart
+          - Chart version: \`${GITHUB_REF_NAME}\`
+          - App version: \`${GITHUB_REF_NAME}\`
+          
+          ### 📖 Installation
+          
+          **Helm:**
+          \`\`\`bash
+          helm repo add shazamq https://shazamq.github.io/shazamq-operator
+          helm repo update
+          helm install shazamq-operator shazamq/shazamq-operator --namespace shazamq-system --create-namespace
+          \`\`\`
+          
+          **Docker:**
+          \`\`\`bash
+          docker pull ghcr.io/${{ github.repository }}:${VERSION}
+          \`\`\`
+          
+          ### 📝 Changelog
+          EOF
+          
+          # Try to extract from CHANGELOG.md if it exists
           if [ -f CHANGELOG.md ]; then
-            sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md || \
-            echo "## Release ${VERSION}" > release-notes.md
+            # Extract section for this version
+            awk "/## \[${VERSION}\]/, /## \[.*\]/ { if (/## \[${VERSION}\]/) print; else if (!/## \[.*\]/) print }" CHANGELOG.md >> release-notes.md || true
           else
-            echo "## Release ${VERSION}" > release-notes.md
-            echo "" >> release-notes.md
-            echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref }}/CHANGELOG.md) for details." >> release-notes.md
+            echo "See [commit history](https://github.com/${{ github.repository }}/compare/...${GITHUB_REF_NAME}) for changes in this release." >> release-notes.md
           fi
+          
+          echo "" >> release-notes.md
+          echo "### 🔒 Checksums" >> release-notes.md
+          echo "SHA256 checksums are available in \`CHECKSUMS.txt\`" >> release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: release-notes.md
           files: |
-            artifacts/**/*.tar.gz
-            artifacts/**/*.sha256
-            artifacts/**/*.tgz
-            artifacts/CHECKSUMS.txt
+            release-assets/*.tar.gz
+            release-assets/*.sha256
+            release-assets/*.tgz
+            release-assets/CHECKSUMS.txt
+          fail_on_unmatched_files: false
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-alpha') || contains(github.ref, '-beta') }}
         env:
@@ -371,8 +476,25 @@ jobs:
     needs: create-release
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Trigger ArtifactHub scan
+      - name: Wait for GitHub Pages deployment
         run: |
-          echo "ArtifactHub will automatically scan the Helm repository"
-          echo "Chart URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "Waiting 60 seconds for GitHub Pages to deploy..."
+          sleep 60
 
+      - name: Verify Helm repository is accessible
+        run: |
+          REPO_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "Verifying Helm repository at: $REPO_URL"
+          
+          # Check if index.yaml is accessible
+          if curl -f -s "$REPO_URL/index.yaml" > /dev/null; then
+            echo "✅ Helm repository index.yaml is accessible"
+          else
+            echo "⚠️  Helm repository index.yaml is not yet accessible. ArtifactHub will retry later."
+          fi
+          
+          echo ""
+          echo "📦 ArtifactHub Information:"
+          echo "Repository URL: $REPO_URL"
+          echo "ArtifactHub will automatically scan this repository periodically."
+          echo "You can also trigger a manual scan from the ArtifactHub control panel."

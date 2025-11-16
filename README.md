@@ -1,3 +1,5 @@
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/shazamq-operator)](https://artifacthub.io/packages/search?repo=shazamq-operator)
+
 # Shazamq Kubernetes Operator
 
 A Kubernetes operator for managing Shazamq clusters declaratively using Custom Resource Definitions (CRDs).
