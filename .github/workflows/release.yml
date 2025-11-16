@@ -42,26 +42,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
+          targets: ${{ matrix.target }}
 
       - name: Cache cargo registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Cache cargo index
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Cache cargo build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
@@ -73,10 +72,8 @@ jobs:
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Build release binary
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target ${{ matrix.target }}
+        run: |
+          cargo build --release --target ${{ matrix.target }}
 
       - name: Create tarball
         run: |
@@ -85,7 +82,7 @@ jobs:
           sha256sum ${{ matrix.asset_name }}.tar.gz > ${{ matrix.asset_name }}.tar.gz.sha256
 
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
           path: target/${{ matrix.target }}/release/${{ matrix.asset_name }}.tar.gz*
@@ -98,20 +95,20 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to Quay.io
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -148,44 +145,177 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for gh-pages
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
         with:
           version: 'latest'
 
-      - name: Package Helm chart
-        run: |
-          helm package charts/ -d .deploy
-
-      - name: Upload Helm chart artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: helm-chart
-          path: .deploy/*.tgz
-
-      - name: Publish to GitHub Pages
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Clone gh-pages branch
-          git clone --single-branch --branch gh-pages https://github.com/${{ github.repository }}.git gh-pages || \
-            git clone https://github.com/${{ github.repository }}.git gh-pages && \
-            cd gh-pages && git checkout --orphan gh-pages && git rm -rf . && cd ..
-          
-          # Copy chart to gh-pages
+
+      - name: Package Helm chart
+        run: |
+          mkdir -p .deploy
+          helm package charts/ -d .deploy
+          echo "Chart packaged: $(ls -la .deploy/)"
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Helm repository
+        run: |
+          # Copy new chart package
           cp .deploy/*.tgz gh-pages/
           
-          # Update index
+          # Update index.yaml
           cd gh-pages
-          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }} --merge index.yaml
           
-          # Commit and push
+          # Ensure essential files exist
+          if [ ! -f "index.html" ]; then
+            echo "Creating index.html..."
+            cat > index.html <<'EOF'
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Shazamq Operator Helm Repository</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        line-height: 1.6; color: #333;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        min-height: 100vh; display: flex; align-items: center; justify-content: center;
+                        padding: 20px;
+                    }
+                    .container {
+                        background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                        max-width: 800px; width: 100%; padding: 40px;
+                    }
+                    h1 { color: #667eea; margin-bottom: 10px; font-size: 2.5em; }
+                    .subtitle { color: #666; margin-bottom: 30px; font-size: 1.1em; }
+                    .section { margin: 30px 0; }
+                    h2 { color: #444; margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+                    .code-block {
+                        background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px;
+                        padding: 15px; margin: 15px 0; overflow-x: auto;
+                        font-family: 'Courier New', monospace; font-size: 0.9em;
+                    }
+                    .badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin: 5px 5px 5px 0; }
+                    .badge-success { background: #10b981; color: white; }
+                    .badge-info { background: #3b82f6; color: white; }
+                    .links { display: flex; gap: 15px; flex-wrap: wrap; }
+                    .link-button {
+                        display: inline-block; padding: 10px 20px; background: #667eea; color: white;
+                        text-decoration: none; border-radius: 6px; transition: background 0.3s;
+                    }
+                    .link-button:hover { background: #5568d3; }
+                    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9em; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🚀 Shazamq Operator</h1>
+                    <p class="subtitle">Kubernetes Operator for Managing Shazamq Clusters</p>
+                    <div class="section">
+                        <span class="badge badge-success">✓ Active</span>
+                        <span class="badge badge-info">v1.0.0</span>
+                        <span class="badge badge-info">Kafka-compatible</span>
+                    </div>
+                    <div class="section">
+                        <h2>📦 Installation</h2>
+                        <p>Add the Helm repository and install the operator:</p>
+                        <div class="code-block">
+            # Add Helm repository<br>
+            helm repo add shazamq https://shazamq.github.io/shazamq-operator<br>
+            helm repo update<br>
+            <br>
+            # Install operator<br>
+            helm install shazamq-operator shazamq/shazamq-operator \<br>
+            &nbsp;&nbsp;--namespace shazamq-system \<br>
+            &nbsp;&nbsp;--create-namespace
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h2>🔍 Search Charts</h2>
+                        <div class="code-block">helm search repo shazamq</div>
+                    </div>
+                    <div class="section">
+                        <h2>📚 Available Charts</h2>
+                        <ul>
+                            <li><strong>shazamq-operator</strong> - Kubernetes operator for managing Shazamq clusters (v1.0.0)</li>
+                        </ul>
+                    </div>
+                    <div class="section">
+                        <h2>🔗 Quick Links</h2>
+                        <div class="links">
+                            <a href="https://github.com/shazamq/shazamq-operator" class="link-button">📁 GitHub Repository</a>
+                            <a href="https://artifacthub.io/packages/helm/shazamq/shazamq-operator" class="link-button">📦 ArtifactHub</a>
+                            <a href="https://github.com/shazamq/shazamq-operator/blob/master/README.md" class="link-button">📖 Documentation</a>
+                            <a href="index.yaml" class="link-button">📄 Helm Index</a>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h2>✨ Features</h2>
+                        <ul>
+                            <li>✅ Kafka wire protocol compatible</li>
+                            <li>✅ Declarative cluster management via CRD</li>
+                            <li>✅ Automatic StatefulSet orchestration</li>
+                            <li>✅ MirrorMaker for Kafka migration</li>
+                            <li>✅ Tiered storage (S3/GCS) support</li>
+                            <li>✅ Built-in monitoring and observability</li>
+                            <li>✅ Production-ready security features</li>
+                        </ul>
+                    </div>
+                    <div class="footer">
+                        <p>Shazamq Operator | Apache License 2.0 | Maintained by the Shazamq Team</p>
+                        <p style="margin-top: 10px;">
+                            <a href="https://github.com/shazamq/shazamq-operator/issues" style="color: #667eea;">Report Issues</a> •
+                            <a href="https://github.com/shazamq/shazamq-operator/discussions" style="color: #667eea;">Discussions</a> •
+                            <a href="https://github.com/shazamq/shazamq" style="color: #667eea;">Main Project</a>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            EOF
+          fi
+          
+          # Ensure .nojekyll exists
+          touch .nojekyll
+          
+          # Ensure artifacthub-repo.yml exists (copy from main branch if missing)
+          if [ ! -f "artifacthub-repo.yml" ]; then
+            echo "Copying artifacthub-repo.yml from main branch..."
+            git checkout origin/main -- artifacthub-repo.yml 2>/dev/null || \
+            git checkout origin/master -- artifacthub-repo.yml 2>/dev/null || \
+            echo "artifacthub-repo.yml not found in main/master, skipping"
+          fi
+
+      - name: Commit and push to gh-pages
+        run: |
+          cd gh-pages
           git add .
-          git commit -m "Release Helm chart ${{ github.ref_name }}"
+          git commit -m "Release Helm chart ${{ github.ref_name }}" || echo "No changes to commit"
           git push origin gh-pages
+
+      - name: Upload Helm chart artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-chart
+          path: .deploy/*.tgz
+          retention-days: 30
 
   create-release:
     name: Create GitHub Release
@@ -196,30 +326,42 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
+          pattern: '*'
+          merge-multiple: true
 
       - name: Generate checksums
         run: |
           cd artifacts
-          find . -type f -name "*.tar.gz" -exec sha256sum {} \; > CHECKSUMS.txt
+          find . -type f \( -name "*.tar.gz" -o -name "*.tgz" \) -exec sha256sum {} \; > CHECKSUMS.txt
+          cat CHECKSUMS.txt
 
       - name: Extract changelog for this version
         id: changelog
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
+          if [ -f CHANGELOG.md ]; then
+            sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md || \
+            echo "## Release ${VERSION}" > release-notes.md
+          else
+            echo "## Release ${VERSION}" > release-notes.md
+            echo "" >> release-notes.md
+            echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref }}/CHANGELOG.md) for details." >> release-notes.md
+          fi
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           body_path: release-notes.md
           files: |
             artifacts/**/*.tar.gz
             artifacts/**/*.sha256
-            artifacts/helm-chart/*.tgz
+            artifacts/**/*.tgz
             artifacts/CHECKSUMS.txt
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-alpha') || contains(github.ref, '-beta') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
