@@ -17,7 +17,7 @@ links:
   - name: Project Homepage
     url: https://github.com/shazamq/shazamq-operator
   - name: Documentation
-    url: https://github.com/shazamq/shazamq-operator/blob/master/README.md
+    url: https://github.com/shazamq/shazamq-operator/blob/main/README.md
   - name: Main Shazamq Project
     url: https://github.com/shazamq/shazamq
   - name: Support

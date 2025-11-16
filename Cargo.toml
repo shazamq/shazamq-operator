@@ -1,6 +1,6 @@
 [package]
 name = "shazamq-operator"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Murtaza Shajapurwala"]
 description = "Kubernetes operator for Shazamq clusters"

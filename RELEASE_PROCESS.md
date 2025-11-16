@@ -33,7 +33,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 | Operator Version | Helm Chart Version | Docker Tag | Status |
 |------------------|-------------------|------------|--------|
-| 0.1.0            | 1.0.0             | 0.1.0      | ✅ Current |
+| 0.1.1            | 1.0.0             | 0.1.1      | ✅ Current |
 | 0.2.0 (planned)  | 1.1.0 (planned)   | 0.2.0      | 🔮 Future |
 
 ---
@@ -42,7 +42,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 ### Main Branches
 
-- **`master`**: Production-ready code
+- **`main`**: Production-ready code
   - Always stable and deployable
   - Protected branch (requires PR + reviews)
   - Tagged with releases
@@ -50,7 +50,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 - **`develop`**: Integration branch for features
   - Next release preparation
   - Features merged here first
-  - Regularly merged to `master` for releases
+  - Regularly merged to `main` for releases
 
 ### Supporting Branches
 
@@ -61,17 +61,17 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 - **Release branches**: `release/v<version>`
   - Branch from: `develop`
-  - Merge to: `master` and `develop`
-  - Naming: `release/v0.1.0`
+  - Merge to: `main` and `develop`
+  - Naming: `release/v0.1.1`
 
 - **Hotfix branches**: `hotfix/v<version>`
-  - Branch from: `master`
-  - Merge to: `master` and `develop`
-  - Naming: `hotfix/v0.1.1`
+  - Branch from: `main`
+  - Merge to: `main` and `develop`
+  - Naming: `hotfix/v0.1.2`
 
 ### Branch Protection Rules
 
-**`master` branch**:
+**`main` branch**:
 ```yaml
 - Require pull request reviews: 1+
 - Require status checks to pass: true
@@ -113,7 +113,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 - [ ] Build and test Docker image
 - [ ] Package and test Helm chart
 - [ ] Create release commit
-- [ ] Merge release branch to `master`
+- [ ] Merge release branch to `main`
 - [ ] Tag release: `v<version>`
 - [ ] Push tag to trigger CI/CD
 
@@ -141,7 +141,7 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 ```bash
 # Automated release (recommended)
-./scripts/release.sh 0.1.0
+./scripts/release.sh 0.1.1
 ```
 
 This script will:
@@ -189,15 +189,15 @@ If automation fails or manual intervention is needed:
 # Create release branch from develop
 git checkout develop
 git pull origin develop
-git checkout -b release/v0.1.0
+git checkout -b release/v0.1.1
 
 # Update versions
 # Edit: Cargo.toml, charts/Chart.yaml, charts/values.yaml
 
 # Commit changes
 git add -A
-git commit -m "chore: prepare release v0.1.0"
-git push origin release/v0.1.0
+git commit -m "chore: prepare release v0.1.1"
+git push origin release/v0.1.1
 ```
 
 ### Step 2: Build and Test
@@ -208,37 +208,37 @@ cargo build --release
 cargo test --release
 
 # Build Docker image
-docker build -t shazamq/shazamq-operator:0.1.0 .
+docker build -t shazamq/shazamq-operator:0.1.1 .
 
 # Test Docker image
-docker run --rm shazamq/shazamq-operator:0.1.0 --version
+docker run --rm shazamq/shazamq-operator:0.1.1 --version
 
 # Package Helm chart
 helm package charts/ -d .deploy
 helm lint .deploy/shazamq-operator-*.tgz
 ```
 
-### Step 3: Merge to Master
+### Step 3: Merge to Main
 
 ```bash
-# Create PR: release/v0.1.0 → master
+# Create PR: release/v0.1.1 → main
 # After review and approval:
-git checkout master
-git pull origin master
-git merge --no-ff release/v0.1.0
-git push origin master
+git checkout main
+git pull origin main
+git merge --no-ff release/v0.1.1
+git push origin main
 ```
 
 ### Step 4: Tag and Release
 
 ```bash
 # Create annotated tag
-git tag -a v0.1.0 -m "Release v0.1.0
+git tag -a v0.1.1 -m "Release v0.1.1
 
 See CHANGELOG.md for details."
 
 # Push tag (triggers GitHub Actions)
-git push origin v0.1.0
+git push origin v0.1.1
 ```
 
 ### Step 5: Manual Container Push (if needed)
@@ -250,13 +250,13 @@ docker login ghcr.io
 
 # Build multi-arch and push to Quay.io (primary)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t quay.io/shazamq/shazamq-operator:0.1.0 \
+  -t quay.io/shazamq/shazamq-operator:0.1.1 \
   -t quay.io/shazamq/shazamq-operator:latest \
   --push .
 
 # Push to GHCR (mirror)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/shazamq/shazamq-operator:0.1.0 \
+  -t ghcr.io/shazamq/shazamq-operator:0.1.1 \
   -t ghcr.io/shazamq/shazamq-operator:latest \
   --push .
 ```
@@ -280,7 +280,7 @@ helm repo index . --url https://shazamq.github.io/shazamq-operator
 
 # Commit and push
 git add .
-git commit -m "Release Helm chart v1.0.0 (app v0.1.0)"
+git commit -m "Release Helm chart v1.0.0 (app v0.1.1)"
 git push origin gh-pages
 ```
 
@@ -288,11 +288,11 @@ git push origin gh-pages
 
 ```bash
 # Extract changelog section
-sed -n "/## \[0.1.0\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
+sed -n "/## \[0.1.1\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
 
 # Create release via GitHub CLI
-gh release create v0.1.0 \
-  --title "Release v0.1.0" \
+gh release create v0.1.1 \
+  --title "Release v0.1.1" \
   --notes-file release-notes.md \
   target/release/shazamq-operator \
   .deploy/*.tgz
@@ -306,7 +306,7 @@ gh release create v0.1.0 \
 
 ```bash
 git checkout develop
-git merge master
+git merge main
 git push origin develop
 ```
 
@@ -314,10 +314,10 @@ git push origin develop
 
 ```bash
 # Quay.io (primary)
-docker pull quay.io/shazamq/shazamq-operator:0.1.0
+docker pull quay.io/shazamq/shazamq-operator:0.1.1
 
 # GHCR (mirror)
-docker pull ghcr.io/shazamq/shazamq-operator:0.1.0
+docker pull ghcr.io/shazamq/shazamq-operator:0.1.1
 
 # Helm chart
 helm repo add shazamq https://shazamq.github.io/shazamq-operator
@@ -340,7 +340,7 @@ open https://artifacthub.io/packages/helm/shazamq/shazamq-operator
 ```markdown
 **Template for announcement:**
 
-🎉 Shazamq Operator v0.1.0 Released!
+🎉 Shazamq Operator v0.1.1 Released!
 
 We're excited to announce the first release of the Shazamq Operator!
 
@@ -357,11 +357,11 @@ helm install shazamq-operator shazamq/shazamq-operator
 ```
 
 **Links:**
-- Release Notes: https://github.com/shazamq/shazamq-operator/releases/tag/v0.1.0
-- Documentation: https://github.com/shazamq/shazamq-operator/blob/master/README.md
+- Release Notes: https://github.com/shazamq/shazamq-operator/releases/tag/v0.1.1
+- Documentation: https://github.com/shazamq/shazamq-operator/blob/main/README.md
 - Helm Chart: https://artifacthub.io/packages/helm/shazamq/shazamq-operator
 
-Full Changelog: https://github.com/shazamq/shazamq-operator/blob/master/CHANGELOG.md
+Full Changelog: https://github.com/shazamq/shazamq-operator/blob/main/CHANGELOG.md
 ```
 
 ---
@@ -373,8 +373,8 @@ For critical bugs in production:
 ### 1. Create Hotfix Branch
 
 ```bash
-git checkout master
-git checkout -b hotfix/v0.1.1
+git checkout main
+git checkout -b hotfix/v0.1.2
 ```
 
 ### 2. Fix Bug
@@ -389,30 +389,30 @@ git commit -m "fix: critical bug in reconciler"
 
 ```bash
 # Bump patch version in:
-# - Cargo.toml: 0.1.0 → 0.1.1
-# - charts/Chart.yaml: appVersion 0.1.1
-# - charts/values.yaml: image tag 0.1.1
+# - Cargo.toml: 0.1.1 → 0.1.2
+# - charts/Chart.yaml: appVersion 0.1.2
+# - charts/values.yaml: image tag 0.1.2
 git add -A
-git commit -m "chore: bump version to 0.1.1"
+git commit -m "chore: bump version to 0.1.2"
 ```
 
 ### 4. Release
 
 ```bash
-# Merge to master
-git checkout master
-git merge --no-ff hotfix/v0.1.1
-git tag -a v0.1.1 -m "Hotfix v0.1.1"
-git push origin master
-git push origin v0.1.1
+# Merge to main
+git checkout main
+git merge --no-ff hotfix/v0.1.2
+git tag -a v0.1.2 -m "Hotfix v0.1.2"
+git push origin main
+git push origin v0.1.2
 
 # Merge back to develop
 git checkout develop
-git merge hotfix/v0.1.1
+git merge hotfix/v0.1.2
 git push origin develop
 
 # Delete hotfix branch
-git branch -d hotfix/v0.1.1
+git branch -d hotfix/v0.1.2
 ```
 
 ---
@@ -427,7 +427,7 @@ git branch -d hotfix/v0.1.1
 
 | Version | Target Date | Key Features |
 |---------|-------------|--------------|
-| 0.1.0   | 2025-11-16  | ✅ Initial release |
+| 0.1.1   | 2025-11-16  | ✅ Initial release |
 | 0.2.0   | 2026-Q1     | Webhooks, auto-scaling |
 | 0.3.0   | 2026-Q2     | Multi-cluster federation |
 | 1.0.0   | 2026-Q3     | Stable API, LTS support |
@@ -452,11 +452,11 @@ helm upgrade shazamq-operator shazamq/shazamq-operator --version 0.9.0
 
 ```bash
 # Delete tag
-git tag -d v0.1.0
-git push origin :refs/tags/v0.1.0
+git tag -d v0.1.1
+git push origin :refs/tags/v0.1.1
 
 # Delete GitHub release
-gh release delete v0.1.0
+gh release delete v0.1.1
 
 # Remove from Helm repo
 # (edit gh-pages branch)

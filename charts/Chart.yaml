@@ -3,7 +3,7 @@ name: shazamq-operator
 description: Kubernetes operator for managing Shazamq clusters
 type: application
 version: 1.0.0
-appVersion: "0.1.0"
+appVersion: "0.1.1"
 keywords:
   - shazamq
   - kafka

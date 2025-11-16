@@ -29,7 +29,7 @@ The Shazamq Operator has been deployed to namespace: {{ .Release.Namespace }}
        namespace: messaging
      spec:
        replicas: 3
-       version: "0.1.0-rc1"
+       version: "0.1.1-rc1"
      EOF
 
   3. Check cluster status:
