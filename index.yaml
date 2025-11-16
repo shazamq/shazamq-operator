@@ -1,0 +1,27 @@
+apiVersion: v1
+entries:
+  shazamq-operator:
+  - annotations:
+      helm.sh/resource-policy: keep
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-11-17T02:32:30.756844+05:30"
+    description: Kubernetes operator for managing Shazamq clusters
+    digest: 03e40429e0f7153c0d13cd8aaa31f36e10331edcc818779dbdbf870e75c8ea22
+    home: https://github.com/shazamq/shazamq-operator
+    keywords:
+    - shazamq
+    - kafka
+    - messaging
+    - operator
+    maintainers:
+    - email: murtaza@shazamq.io
+      name: Murtaza Shajapurwala
+    name: shazamq-operator
+    sources:
+    - https://github.com/shazamq/shazamq-operator
+    type: application
+    urls:
+    - https://shazamq.github.io/shazamq-operator/shazamq-operator-1.0.0.tgz
+    version: 1.0.0
+generated: "2025-11-17T02:32:30.75599+05:30"
