@@ -1,0 +1,41 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Helm
+.deploy/
+charts/*.tgz
+
+# Build artifacts
+*.tar.gz
+*.zip
+dist/
+
+# Test
+test-output/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+.env
+*.key
+*.pem
+secrets.yaml
+
+# Temporary files
+tmp/
+temp/
+

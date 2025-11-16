@@ -2,14 +2,14 @@
 //
 // Shazamq Operator - Kubernetes Operator for Shazamq Clusters
 
-use anyhow::Result;
+use futures::StreamExt;
 use kube::{
     runtime::{controller::Action, Controller},
     Api, Client, ResourceExt,
 };
 use std::sync::Arc;
 use tokio::time::Duration;
-use tracing::{error, info, warn};
+use tracing::{error, info};
 
 mod crd;
 mod reconciler;
@@ -17,8 +17,15 @@ mod reconciler;
 use crd::ShazamqCluster;
 use reconciler::Reconciler;
 
+// Custom error type that implements std::error::Error
+#[derive(Debug, thiserror::Error)]
+enum ReconcilerError {
+    #[error("Reconciliation failed: {0}")]
+    ReconcileFailed(#[from] anyhow::Error),
+}
+
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> anyhow::Result<()> {
     // Initialize tracing
     tracing_subscriber::fmt()
         .with_env_filter(
@@ -50,12 +57,15 @@ async fn main() -> Result<()> {
         .run(
             move |obj, ctx| {
                 let reconciler = ctx.clone();
-                async move { reconciler.reconcile(obj).await }
+                async move { 
+                    reconciler.reconcile(Arc::try_unwrap(obj).unwrap_or_else(|arc| (*arc).clone())).await
+                        .map_err(ReconcilerError::from)
+                }
             },
             |obj, error, _ctx| {
                 error!(
                     name = obj.name_any(),
-                    namespace = obj.namespace(),
+                    namespace = ?obj.namespace(),
                     error = %error,
                     "Reconciliation error"
                 );
@@ -65,11 +75,10 @@ async fn main() -> Result<()> {
         )
         .for_each(|res| async move {
             match res {
-                Ok((obj, action)) => {
+                Ok((obj, _action)) => {
                     info!(
-                        name = obj.name_any(),
-                        namespace = obj.namespace(),
-                        requeue_after = ?action.requeue_after,
+                        name = %obj.name,
+                        namespace = ?obj.namespace,
                         "Reconciled"
                     );
                 }

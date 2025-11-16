@@ -6,7 +6,7 @@
 replicaCount: 1
 
 image:
-  repository: shazamq/shazamq-operator
+  repository: quay.io/shazamq/shazamq-operator
   pullPolicy: IfNotPresent
   tag: "0.1.0"
 

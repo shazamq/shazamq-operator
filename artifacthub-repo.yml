@@ -1,0 +1,37 @@
+# ArtifactHub repository metadata
+# https://artifacthub.io/docs/topics/repositories/
+
+repositoryID: shazamq-operator
+owners:
+  - name: Murtaza Shajapurwala
+    email: murtaza@shazamq.io
+
+# Repository metadata
+displayName: Shazamq Operator
+description: |
+  Kubernetes operator for managing Shazamq clusters. Shazamq is a high-performance, 
+  Kafka-compatible message broker built in Rust with focus on performance, reliability, 
+  and ease of operations.
+
+links:
+  - name: Project Homepage
+    url: https://github.com/shazamq/shazamq-operator
+  - name: Documentation
+    url: https://github.com/shazamq/shazamq-operator/blob/master/README.md
+  - name: Main Shazamq Project
+    url: https://github.com/shazamq/shazamq
+  - name: Support
+    url: https://github.com/shazamq/shazamq-operator/issues
+
+# Repository verification
+verification:
+  enabled: true
+  # signatureKey: |
+  #   -----BEGIN PGP PUBLIC KEY BLOCK-----
+  #   ...
+  #   -----END PGP PUBLIC KEY BLOCK-----
+
+# Additional metadata
+category: Messaging
+license: Apache-2.0
+

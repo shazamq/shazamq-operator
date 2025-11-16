@@ -10,15 +10,15 @@ use k8s_openapi::api::core::v1::{
     PersistentVolumeClaimSpec, PodSpec, PodTemplateSpec, ResourceRequirements as K8sResourceRequirements,
     Service, ServicePort, ServiceSpec, Volume, VolumeMount,
 };
-use k8s_openapi::apimachinery::pkg::apis::meta::v1::{Condition, LabelSelector, ObjectMeta};
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::{LabelSelector, ObjectMeta};
 use kube::{
-    api::{Patch, PatchParams, PostParams},
+    api::{Patch, PatchParams},
     runtime::controller::Action,
     Api, Client, ResourceExt,
 };
 use std::collections::BTreeMap;
 use std::time::Duration;
-use tracing::{info, warn};
+use tracing::info;
 
 pub struct Reconciler {
     client: Client,
@@ -150,7 +150,7 @@ impl Reconciler {
     
     async fn reconcile_headless_service(
         &self,
-        cluster: &ShazamqCluster,
+        _cluster: &ShazamqCluster,
         name: &str,
         namespace: &str,
     ) -> Result<()> {
@@ -399,7 +399,7 @@ impl Reconciler {
                 config.push_str(&format!("retention_hours = {}\n", retention_hours));
             }
         }
-        config.push_str("\n");
+        config.push('\n');
         
         config.push_str("[metrics]\n");
         config.push_str("enabled = true\n");
@@ -418,7 +418,7 @@ impl Reconciler {
                     config.push_str(&format!("region = \"{}\"\n", s3.region));
                     config.push_str(&format!("prefix = \"{}\"\n", s3.prefix));
                 }
-                config.push_str("\n");
+                config.push('\n');
             }
         }
         
