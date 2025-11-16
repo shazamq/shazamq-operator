@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-11-16
+## [0.1.1] - 2025-11-16
 
 ### Added
 - 🎉 **Initial Release** of Shazamq Kubernetes Operator
@@ -50,9 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ **Documentation** - Complete operator and CRD documentation
 
 ### Container Images
-- **Operator**: `quay.io/shazamq/shazamq-operator:0.1.0`
-- **Broker**: `quay.io/shazamq/shazamq:0.1.0`
-- **Mirror (GHCR)**: `ghcr.io/shazamq/shazamq-operator:0.1.0`
+- **Operator**: `quay.io/shazamq/shazamq-operator:0.1.1`
+- **Broker**: `quay.io/shazamq/shazamq:0.1.1`
+- **Mirror (GHCR)**: `ghcr.io/shazamq/shazamq-operator:0.1.1`
 
 ### Installation
 
@@ -76,11 +76,11 @@ helm install shazamq-operator oci://ghcr.io/shazamq/charts/shazamq-operator \
 #### Via Container Registry
 ```bash
 # Quay.io (Primary)
-docker pull quay.io/shazamq/shazamq-operator:0.1.0
-docker pull quay.io/shazamq/shazamq:0.1.0
+docker pull quay.io/shazamq/shazamq-operator:0.1.1
+docker pull quay.io/shazamq/shazamq:0.1.1
 
 # GitHub Container Registry (Mirror)
-docker pull ghcr.io/shazamq/shazamq-operator:0.1.0
+docker pull ghcr.io/shazamq/shazamq-operator:0.1.1
 ```
 
 ### Quick Start
@@ -100,8 +100,8 @@ metadata:
   name: my-cluster
 spec:
   replicas: 3
-  version: "0.1.0"
-  image: "quay.io/shazamq/shazamq:0.1.0"
+  version: "0.1.1"
+  image: "quay.io/shazamq/shazamq:0.1.1"
   replication:
     factor: 3
     minInSyncReplicas: 2
@@ -173,19 +173,19 @@ Initial benchmarks show:
 ## Release Assets
 
 ### Binary Downloads
-- Linux (x86_64): [shazamq-operator-v0.1.0-linux-amd64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.0/shazamq-operator-v0.1.0-linux-amd64.tar.gz)
-- Linux (ARM64): [shazamq-operator-v0.1.0-linux-arm64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.0/shazamq-operator-v0.1.0-linux-arm64.tar.gz)
-- macOS (x86_64): [shazamq-operator-v0.1.0-darwin-amd64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.0/shazamq-operator-v0.1.0-darwin-amd64.tar.gz)
-- macOS (ARM64): [shazamq-operator-v0.1.0-darwin-arm64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.0/shazamq-operator-v0.1.0-darwin-arm64.tar.gz)
+- Linux (x86_64): [shazamq-operator-v0.1.1-linux-amd64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.1/shazamq-operator-v0.1.1-linux-amd64.tar.gz)
+- Linux (ARM64): [shazamq-operator-v0.1.1-linux-arm64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.1/shazamq-operator-v0.1.1-linux-arm64.tar.gz)
+- macOS (x86_64): [shazamq-operator-v0.1.1-darwin-amd64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.1/shazamq-operator-v0.1.1-darwin-amd64.tar.gz)
+- macOS (ARM64): [shazamq-operator-v0.1.1-darwin-arm64.tar.gz](https://github.com/shazamq/shazamq-operator/releases/download/v0.1.1/shazamq-operator-v0.1.1-darwin-arm64.tar.gz)
 
 ### Container Images
 ```bash
 # Primary: Quay.io
-docker pull quay.io/shazamq/shazamq-operator:0.1.0
+docker pull quay.io/shazamq/shazamq-operator:0.1.1
 docker pull quay.io/shazamq/shazamq-operator:latest
 
 # Mirror: GHCR
-docker pull ghcr.io/shazamq/shazamq-operator:0.1.0
+docker pull ghcr.io/shazamq/shazamq-operator:0.1.1
 docker pull ghcr.io/shazamq/shazamq-operator:latest
 ```
 
@@ -203,8 +203,8 @@ SHA256 checksums for release artifacts:
 
 ---
 
-**Full Changelog**: https://github.com/shazamq/shazamq-operator/commits/v0.1.0
+**Full Changelog**: https://github.com/shazamq/shazamq-operator/commits/v0.1.1
 
-[Unreleased]: https://github.com/shazamq/shazamq-operator/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/shazamq/shazamq-operator/releases/tag/v0.1.0
+[Unreleased]: https://github.com/shazamq/shazamq-operator/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/shazamq/shazamq-operator/releases/tag/v0.1.1
 

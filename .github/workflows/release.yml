@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@main
         with:
           toolchain: stable
           targets: ${{ matrix.target }}
@@ -262,7 +262,7 @@ jobs:
                         <div class="links">
                             <a href="https://github.com/shazamq/shazamq-operator" class="link-button">📁 GitHub Repository</a>
                             <a href="https://artifacthub.io/packages/helm/shazamq/shazamq-operator" class="link-button">📦 ArtifactHub</a>
-                            <a href="https://github.com/shazamq/shazamq-operator/blob/master/README.md" class="link-button">📖 Documentation</a>
+                            <a href="https://github.com/shazamq/shazamq-operator/blob/main/README.md" class="link-button">📖 Documentation</a>
                             <a href="index.yaml" class="link-button">📄 Helm Index</a>
                         </div>
                     </div>
@@ -299,8 +299,8 @@ jobs:
           if [ ! -f "artifacthub-repo.yml" ]; then
             echo "Copying artifacthub-repo.yml from main branch..."
             git checkout origin/main -- artifacthub-repo.yml 2>/dev/null || \
-            git checkout origin/master -- artifacthub-repo.yml 2>/dev/null || \
-            echo "artifacthub-repo.yml not found in main/master, skipping"
+            git checkout origin/main -- artifacthub-repo.yml 2>/dev/null || \
+            echo "artifacthub-repo.yml not found in main/main, skipping"
           fi
 
       - name: Commit and push to gh-pages

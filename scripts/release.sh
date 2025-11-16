@@ -7,13 +7,13 @@ set -euo pipefail
 VERSION=${1:-}
 if [ -z "$VERSION" ]; then
     echo "Usage: $0 <version>"
-    echo "Example: $0 0.1.0"
+    echo "Example: $0 0.1.1"
     exit 1
 fi
 
 # Validate version format
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Error: Version must be in format X.Y.Z (e.g., 0.1.0)"
+    echo "Error: Version must be in format X.Y.Z (e.g., 0.1.1)"
     exit 1
 fi
 
