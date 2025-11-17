@@ -218,113 +218,31 @@ jobs:
           # Ensure essential files exist
           if [ ! -f "index.html" ]; then
             echo "Creating index.html..."
-            cat > index.html <<'EOF'
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Shazamq Operator Helm Repository</title>
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        line-height: 1.6; color: #333;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        min-height: 100vh; display: flex; align-items: center; justify-content: center;
-                        padding: 20px;
-                    }
-                    .container {
-                        background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                        max-width: 800px; width: 100%; padding: 40px;
-                    }
-                    h1 { color: #667eea; margin-bottom: 10px; font-size: 2.5em; }
-                    .subtitle { color: #666; margin-bottom: 30px; font-size: 1.1em; }
-                    .section { margin: 30px 0; }
-                    h2 { color: #444; margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
-                    .code-block {
-                        background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px;
-                        padding: 15px; margin: 15px 0; overflow-x: auto;
-                        font-family: 'Courier New', monospace; font-size: 0.9em;
-                    }
-                    .badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin: 5px 5px 5px 0; }
-                    .badge-success { background: #10b981; color: white; }
-                    .badge-info { background: #3b82f6; color: white; }
-                    .links { display: flex; gap: 15px; flex-wrap: wrap; }
-                    .link-button {
-                        display: inline-block; padding: 10px 20px; background: #667eea; color: white;
-                        text-decoration: none; border-radius: 6px; transition: background 0.3s;
-                    }
-                    .link-button:hover { background: #5568d3; }
-                    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9em; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🚀 Shazamq Operator</h1>
-                    <p class="subtitle">Kubernetes Operator for Managing Shazamq Clusters</p>
-                    <div class="section">
-                        <span class="badge badge-success">✓ Active</span>
-                        <span class="badge badge-info">Latest: ${{ steps.get_version.outputs.VERSION }}</span>
-                        <span class="badge badge-info">Kafka-compatible</span>
-                    </div>
-                    <div class="section">
-                        <h2>📦 Installation</h2>
-                        <p>Add the Helm repository and install the operator:</p>
-                        <div class="code-block">
-            # Add Helm repository<br>
-            helm repo add shazamq https://shazamq.github.io/shazamq-operator<br>
-            helm repo update<br>
-            <br>
-            # Install operator<br>
-            helm install shazamq-operator shazamq/shazamq-operator \<br>
-            &nbsp;&nbsp;--namespace shazamq-system \<br>
-            &nbsp;&nbsp;--create-namespace
-                        </div>
-                    </div>
-                    <div class="section">
-                        <h2>🔍 Search Charts</h2>
-                        <div class="code-block">helm search repo shazamq</div>
-                    </div>
-                    <div class="section">
-                        <h2>📚 Available Charts</h2>
-                        <ul>
-                            <li><strong>shazamq-operator</strong> - Kubernetes operator for managing Shazamq clusters</li>
-                        </ul>
-                    </div>
-                    <div class="section">
-                        <h2>🔗 Quick Links</h2>
-                        <div class="links">
-                            <a href="https://github.com/shazamq/shazamq-operator" class="link-button">📁 GitHub Repository</a>
-                            <a href="https://artifacthub.io/packages/helm/shazamq/shazamq-operator" class="link-button">📦 ArtifactHub</a>
-                            <a href="https://github.com/shazamq/shazamq-operator/blob/main/README.md" class="link-button">📖 Documentation</a>
-                            <a href="index.yaml" class="link-button">📄 Helm Index</a>
-                        </div>
-                    </div>
-                    <div class="section">
-                        <h2>✨ Features</h2>
-                        <ul>
-                            <li>✅ Kafka wire protocol compatible</li>
-                            <li>✅ Declarative cluster management via CRD</li>
-                            <li>✅ Automatic StatefulSet orchestration</li>
-                            <li>✅ MirrorMaker for Kafka migration</li>
-                            <li>✅ Tiered storage (S3/GCS) support</li>
-                            <li>✅ Built-in monitoring and observability</li>
-                            <li>✅ Production-ready security features</li>
-                        </ul>
-                    </div>
-                    <div class="footer">
-                        <p>Shazamq Operator | Apache License 2.0 | Maintained by the Shazamq Team</p>
-                        <p style="margin-top: 10px;">
-                            <a href="https://github.com/shazamq/shazamq-operator/issues" style="color: #667eea;">Report Issues</a> •
-                            <a href="https://github.com/shazamq/shazamq-operator/discussions" style="color: #667eea;">Discussions</a> •
-                            <a href="https://github.com/shazamq/shazamq" style="color: #667eea;">Main Project</a>
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            EOF
+            printf '%s\n' \
+              '<!DOCTYPE html>' \
+              '<html lang="en">' \
+              '<head>' \
+              '    <meta charset="UTF-8">' \
+              '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' \
+              '    <title>Shazamq Operator Helm Repository</title>' \
+              '    <style>' \
+              '        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; margin: 0; }' \
+              '        .container { background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 800px; width: 100%%; padding: 40px; }' \
+              '        h1 { color: #667eea; margin-bottom: 10px; }' \
+              '        .code-block { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin: 15px 0; font-family: monospace; }' \
+              '        a { color: #667eea; text-decoration: none; }' \
+              '        a:hover { text-decoration: underline; }' \
+              '    </style>' \
+              '</head>' \
+              '<body>' \
+              '    <div class="container">' \
+              '        <h1>🚀 Shazamq Operator Helm Repository</h1>' \
+              '        <p>Add this repository:</p>' \
+              '        <div class="code-block">helm repo add shazamq https://shazamq.github.io/shazamq-operator<br>helm repo update</div>' \
+              '        <p><a href="index.yaml">View Helm Index</a> | <a href="https://github.com/shazamq/shazamq-operator">GitHub</a></p>' \
+              '    </div>' \
+              '</body>' \
+              '</html>' > index.html
           fi
           
           # Ensure .nojekyll exists
@@ -332,12 +250,11 @@ jobs:
           
           # Create or update artifacthub-repo.yml
           if [ ! -f "artifacthub-repo.yml" ]; then
-            cat > artifacthub-repo.yml <<'EOF'
-            repositoryID: shazamq-operator
-            owners:
-              - name: shazamq
-                email: team@shazamq.io
-            EOF
+            printf '%s\n' \
+              'repositoryID: shazamq-operator' \
+              'owners:' \
+              '  - name: shazamq' \
+              '    email: team@shazamq.io' > artifacthub-repo.yml
           fi
 
       - name: Commit and push to gh-pages
@@ -407,41 +324,41 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           
           # Create a default release notes file
-          cat > release-notes.md << EOF
-          ## Release ${GITHUB_REF#refs/tags/}
-          
-          ### 📦 Assets
-          
-          #### Binary Releases
-          - Linux AMD64: \`shazamq-operator-${GITHUB_REF_NAME}-linux-amd64.tar.gz\`
-          - Linux ARM64: \`shazamq-operator-${GITHUB_REF_NAME}-linux-arm64.tar.gz\`
-          - macOS AMD64: \`shazamq-operator-${GITHUB_REF_NAME}-darwin-amd64.tar.gz\`
-          - macOS ARM64: \`shazamq-operator-${GITHUB_REF_NAME}-darwin-arm64.tar.gz\`
-          
-          #### Container Images
-          - \`quay.io/shazamq/shazamq-operator:${VERSION}\`
-          - \`ghcr.io/${{ github.repository }}:${VERSION}\`
-          
-          #### Helm Chart
-          - Chart version: \`${GITHUB_REF_NAME}\`
-          - App version: \`${GITHUB_REF_NAME}\`
-          
-          ### 📖 Installation
-          
-          **Helm:**
-          \`\`\`bash
-          helm repo add shazamq https://shazamq.github.io/shazamq-operator
-          helm repo update
-          helm install shazamq-operator shazamq/shazamq-operator --namespace shazamq-system --create-namespace
-          \`\`\`
-          
-          **Docker:**
-          \`\`\`bash
-          docker pull ghcr.io/${{ github.repository }}:${VERSION}
-          \`\`\`
-          
-          ### 📝 Changelog
-          EOF
+          {
+            echo "## Release ${GITHUB_REF#refs/tags/}"
+            echo ""
+            echo "### 📦 Assets"
+            echo ""
+            echo "#### Binary Releases"
+            echo "- Linux AMD64: \`shazamq-operator-${GITHUB_REF_NAME}-linux-amd64.tar.gz\`"
+            echo "- Linux ARM64: \`shazamq-operator-${GITHUB_REF_NAME}-linux-arm64.tar.gz\`"
+            echo "- macOS AMD64: \`shazamq-operator-${GITHUB_REF_NAME}-darwin-amd64.tar.gz\`"
+            echo "- macOS ARM64: \`shazamq-operator-${GITHUB_REF_NAME}-darwin-arm64.tar.gz\`"
+            echo ""
+            echo "#### Container Images"
+            echo "- \`quay.io/shazamq/shazamq-operator:${VERSION}\`"
+            echo "- \`ghcr.io/${{ github.repository }}:${VERSION}\`"
+            echo ""
+            echo "#### Helm Chart"
+            echo "- Chart version: \`${GITHUB_REF_NAME}\`"
+            echo "- App version: \`${GITHUB_REF_NAME}\`"
+            echo ""
+            echo "### 📖 Installation"
+            echo ""
+            echo "**Helm:**"
+            echo "\`\`\`bash"
+            echo "helm repo add shazamq https://shazamq.github.io/shazamq-operator"
+            echo "helm repo update"
+            echo "helm install shazamq-operator shazamq/shazamq-operator --namespace shazamq-system --create-namespace"
+            echo "\`\`\`"
+            echo ""
+            echo "**Docker:**"
+            echo "\`\`\`bash"
+            echo "docker pull ghcr.io/${{ github.repository }}:${VERSION}"
+            echo "\`\`\`"
+            echo ""
+            echo "### 📝 Changelog"
+          } > release-notes.md
           
           # Try to extract from CHANGELOG.md if it exists
           if [ -f CHANGELOG.md ]; then
